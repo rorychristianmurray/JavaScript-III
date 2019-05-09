@@ -16,12 +16,38 @@
   * destroy() // prototype method that returns: `${this.name} was removed from the game.`
 */
 
+function GameObject(objectAttributes) {
+  this.createdAt = objectAttributes.createdAt;
+  this.name = objectAttributes.name;
+  this.dimensions = objectAttributes.dimensions;
+};
+
+GameObject.prototype.destroy = function() {
+  return `${this.name} was removed from the game`
+};
+
+
 /*
   === CharacterStats ===
   * healthPoints
   * takeDamage() // prototype method -> returns the string '<object name> took damage.'
   * should inherit destroy() from GameObject's prototype
 */
+
+function CharacterStats(characterAttributes) {
+  GameObject.call(this, characterAttributes);
+  this.healthPoints = characterAttributes.healthPoints;
+};
+
+//Make CharacterStats inherit GameObject prototype methods
+
+CharacterStats.prototype = Object.create(GameObject.prototype);
+
+CharacterStats.prototype.takeDamage = function() {
+  return `${this.name} took damage`
+};
+
+
 
 /*
   === Humanoid (Having an appearance or character resembling that of a human.) ===
@@ -32,6 +58,23 @@
   * should inherit destroy() from GameObject through CharacterStats
   * should inherit takeDamage() from CharacterStats
 */
+
+function Humanoid(humanAttributes) {
+  CharacterStats.call(this, humanAttributes);
+  this.team = humanAttributes.team;
+  this.weapons = humanAttributes.weapons;
+  this.language = humanAttributes.language;
+};
+
+//Make Humanoid inherit CharacterStats prototype methods
+
+Humanoid.prototype = Object.create(CharacterStats.prototype);
+
+Humanoid.prototype.greet = function() {
+  return `${this.name} offers a greeting in ${this.language}`
+};
+
+
  
 /*
   * Inheritance chain: GameObject -> CharacterStats -> Humanoid
@@ -41,7 +84,7 @@
 
 // Test you work by un-commenting these 3 objects and the list of console logs below:
 
-/*
+
   const mage = new Humanoid({
     createdAt: new Date(),
     dimensions: {
@@ -102,9 +145,105 @@
   console.log(archer.greet()); // Lilith offers a greeting in Elvish.
   console.log(mage.takeDamage()); // Bruce took damage.
   console.log(swordsman.destroy()); // Sir Mustachio was removed from the game.
-*/
+
 
   // Stretch task: 
   // * Create Villain and Hero constructor functions that inherit from the Humanoid constructor function.  
   // * Give the Hero and Villains different methods that could be used to remove health points from objects which could result in destruction if health gets to 0 or drops below 0;
   // * Create two new objects, one a villain and one a hero and fight it out with methods!
+
+  // Create Hero class constructor function that inherits from Humanoid constructor function
+
+  function Hero(heroAttributes) {
+    Humanoid.call(this, heroAttributes);
+    this.formalTitle = heroAttributes.formalTitle;
+    this.place = heroAttributes.place;
+  };
+
+  // Make Hero inherit Humanoid prototype methods
+
+  Hero.prototype = Object.create(Humanoid.prototype);
+
+  // Give hero a prototype method telling other players to kneel before them.
+
+  Hero.prototype.kneel = function() {
+    return `I am ${this.formalTitle} ${this.name} of ${this.place} and you shall kneel before me!`;
+  }
+
+  Hero.prototype.rainOfGod = function() {
+    this.healthPoints = this.healthPoints + 2;
+    return `You have been blessed by the Rain of God! Your health is now ${this.healthPoints}! May the winds of Sha-mah-lan carry you forward!`;
+  }
+
+  Hero.prototype.fireStorm = function() {
+    this.healthPoints = this.healthPoints - 5;
+    if(this.healthPoints <= 0) {
+      return this.destroy();
+    } else {
+      return `You have been burned by the fires of Hell! Your health is now ${this.healthPoints}! If you fall further you may be banished from this kingdom!`;
+    }
+  }
+
+  function Villain(villainAttributes) {
+    Hero.call(this, villainAttributes);
+  };
+
+    // Make Villain inherit Hero prototype methods
+
+  Villain.prototype = Object.create(Hero.prototype);
+
+  const hero1 = new Hero({
+    createdAt: new Date(),
+    dimensions: {
+      length: 1,
+      width: 2,
+      height: 4,
+    },
+    healthPoints: 5,
+    name: 'Oberin',
+    team: 'Forest Kingdom',
+    weapons: [
+      'Spear',
+      'Poison',
+    ],
+    language: 'Dornish',
+    formalTitle: 'Prince',
+    place: 'Dorne',
+  });
+
+
+  const villain1 = new Villain({
+    createdAt: new Date(),
+    dimensions: {
+      length: 1,
+      width: 2,
+      height: 4,
+    },
+    healthPoints: 5,
+    name: 'Dracula',
+    team: 'Forest Kingdom',
+    weapons: [
+      'Spear',
+      'Poison',
+    ],
+    language: 'Transylvanian',
+    formalTitle: 'Count',
+    place: 'Transylvania',
+  });
+
+  Villain.prototype.beGone = function() {
+    return `I am ${this.formalTitle} ${this.name} of ${this.place} and you shall be gone from my lands!`;
+  }
+
+  console.log(hero1.kneel())
+
+  console.log(villain1.beGone());
+
+  console.log(hero1.rainOfGod());
+
+  console.log(hero1.rainOfGod());
+
+  console.log(hero1.fireStorm());
+
+  console.log(villain1.fireStorm());
+
